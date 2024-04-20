@@ -1,0 +1,144 @@
+-- Create party table
+CREATE TABLE party (
+    party_id VARCHAR(20) NOT NULL,
+    party_enum_type_id VARCHAR(20) DEFAULT NULL,
+    PRIMARY KEY (party_id)
+);
+
+-- Create product table
+CREATE TABLE product (
+    product_id VARCHAR(20) NOT NULL,
+    party_id VARCHAR(20) DEFAULT NULL,
+    product_name VARCHAR(255) DEFAULT NULL,
+    description VARCHAR(1000) DEFAULT NULL,
+    charge_shipping CHAR(1) DEFAULT NULL,
+    returnable CHAR(1) DEFAULT NULL,
+    PRIMARY KEY (product_id),
+    CONSTRAINT product_owner_fk FOREIGN KEY (party_id)
+        REFERENCES party(party_id)
+);
+
+-- Create order_header table
+CREATE TABLE order_header (
+    order_id VARCHAR(20) NOT NULL,
+    order_name VARCHAR(255) DEFAULT NULL,
+    placed_date DATETIME DEFAULT NULL,
+    approved_date DATETIME DEFAULT NULL,
+    status_id VARCHAR(20) DEFAULT NULL,
+    party_id VARCHAR(20) DEFAULT NULL,
+    currency_uom_id VARCHAR(20) DEFAULT NULL,
+    product_store_id VARCHAR(20) DEFAULT NULL,
+    sales_channel_enum_id VARCHAR(20) DEFAULT NULL,
+    grand_total DECIMAL(24,4) DEFAULT NULL,
+    completed_date DATETIME DEFAULT NULL,
+    PRIMARY KEY (order_id),
+    CONSTRAINT order_customer_fk FOREIGN KEY (party_id)
+        REFERENCES party(party_id)
+);
+
+-- Create person table
+CREATE TABLE person (
+    party_id VARCHAR(20) NOT NULL,
+    first_name VARCHAR(255) DEFAULT NULL,
+    middle_name VARCHAR(255) DEFAULT NULL,
+    last_name VARCHAR(255) DEFAULT NULL,
+    gender CHAR(1) DEFAULT NULL,
+    birth_date DATE DEFAULT NULL,
+    marital_status_enum_id VARCHAR(20) DEFAULT NULL,
+    employment_status_enum_id VARCHAR(20) DEFAULT NULL,
+    occupation VARCHAR(255) DEFAULT NULL,
+    PRIMARY KEY (party_id),
+    CONSTRAINT person_ibfk_1 FOREIGN KEY (party_id)
+        REFERENCES party(party_id)
+);
+
+-- Create order_item table
+CREATE TABLE order_item (
+    order_id VARCHAR(20) NOT NULL,
+    order_item_seq_id VARCHAR(20) NOT NULL,
+    product_id VARCHAR(20) DEFAULT NULL,
+    item_description VARCHAR(255) DEFAULT NULL,
+    quantity DECIMAL(24,4) DEFAULT NULL,
+    unit_amount DECIMAL(24,4) DEFAULT NULL,
+    item_type_enum_id VARCHAR(20) DEFAULT NULL,
+    PRIMARY KEY (order_id, order_item_seq_id),
+    CONSTRAINT order_item_order_fk FOREIGN KEY (order_id)
+        REFERENCES order_header(order_id),
+    CONSTRAINT order_item_product_fk FOREIGN KEY (product_id)
+        REFERENCES product(product_id)
+);
+
+
+
+-- Insert into party table
+INSERT INTO party (party_id, party_enum_type_id)
+VALUES ('P1', 'Type1'),
+       ('P2', 'Type2'),
+       ('P3', 'Type1');
+
+-- Insert into product table
+INSERT INTO product (product_id, party_id, product_name, description, charge_shipping, returnable)
+VALUES ('Prod1', 'P1', 'Laptop', 'High performance laptop', 'Y', 'Y'),
+       ('Prod2', 'P2', 'Phone', 'Smartphone with great camera', 'Y', 'N'),
+       ('Prod3', 'P3', 'Headphones', 'Noise-cancelling headphones', 'N', 'Y');
+
+-- Insert into order_header table
+INSERT INTO order_header (order_id, order_name, placed_date, approved_date, status_id, party_id, currency_uom_id, product_store_id, sales_channel_enum_id, grand_total, completed_date)
+VALUES ('Order1', 'OrderName1', '2024-04-20', '2024-04-21', 'Status1', 'P1', 'USD', 'Store1', 'Channel1', 100.50, '2024-04-22'),
+       ('Order2', 'OrderName2', '2024-04-21', '2024-04-22', 'Status2', 'P2', 'EUR', 'Store2', 'Channel2', 200.75, '2024-04-23');
+
+-- Insert into person table
+INSERT INTO person (party_id, first_name, middle_name, last_name, gender, birth_date, marital_status_enum_id, employment_status_enum_id, occupation)
+VALUES ('P1', 'John', 'A', 'Doe', 'M', '1990-01-01', 'Married', 'Employed', 'Engineer'),
+       ('P2', 'Jane', 'B', 'Smith', 'F', '1995-05-05', 'Single', 'Unemployed', 'Student');
+
+-- Insert into order_item table
+INSERT INTO order_item (order_id, order_item_seq_id, product_id, item_description, quantity, unit_amount, item_type_enum_id)
+VALUES ('Order1', 'Seq1', 'Prod1', 'Laptop 15-inch', 1, 1000.50, 'Type1'),
+       ('Order1', 'Seq2', 'Prod3', 'Wireless Headphones', 2, 150.25, 'Type2'),
+       ('Order2', 'Seq1', 'Prod2', 'Smartphone', 1, 500.75, 'Type1');
+-- Update party table: Update party_enum_type_id for party_id 'P1'
+UPDATE party
+SET party_enum_type_id = 'TypeUpdated'
+WHERE party_id = 'P1';
+
+-- Update product table: Update product_name for product_id 'Prod1'
+UPDATE product
+SET product_name = 'Updated Laptop'
+WHERE product_id = 'Prod1';
+
+-- Update order_header table: Update status_id for order_id 'Order1'
+UPDATE order_header
+SET status_id = 'UpdatedStatus'
+WHERE order_id = 'Order1';
+
+-- Update person table: Update first_name for party_id 'P1'
+UPDATE person
+SET first_name = 'UpdatedJohn'
+WHERE party_id = 'P1';
+
+-- Update order_item table: Update item_description for order_id 'Order1' and order_item_seq_id 'Seq1'
+UPDATE order_item
+SET item_description = 'Updated Laptop 15-inch'
+WHERE order_id = 'Order1' AND order_item_seq_id = 'Seq1';
+
+
+-- Delete from party table: Delete party with party_id 'P3'
+DELETE FROM party
+WHERE party_id = 'P3';
+
+-- Delete from product table: Delete product with product_id 'Prod3'
+DELETE FROM product
+WHERE product_id = 'Prod3';
+
+-- Delete from order_header table: Delete order with order_id 'Order2'
+DELETE FROM order_header
+WHERE order_id = 'Order2';
+
+-- Delete from person table: Delete person with party_id 'P2'
+DELETE FROM person
+WHERE party_id = 'P2';
+
+-- Delete from order_item table: Delete order item with order_id 'Order1' and order_item_seq_id 'Seq2'
+DELETE FROM order_item
+WHERE order_id = 'Order1' AND order_item_seq_id = 'Seq2';
